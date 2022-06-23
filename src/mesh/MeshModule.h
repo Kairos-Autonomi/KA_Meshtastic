@@ -129,7 +129,10 @@ class MeshModule
 
     @return ProcessMessage::STOP if you've guaranteed you've handled this message and no other handlers should be considered for it
     */
-    virtual ProcessMessage handleReceived(const MeshPacket &mp) { return ProcessMessage::CONTINUE; }
+    virtual ProcessMessage handleReceived(const MeshPacket &mp) {
+      
+      return ProcessMessage::CONTINUE;
+      }
 
     /** Messages can be received that have the want_response bit set.  If set, this callback will be invoked
      * so that subclasses can (optionally) send a response back to the original sender.

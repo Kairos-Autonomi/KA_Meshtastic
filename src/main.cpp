@@ -27,6 +27,7 @@
 #include "sleep.h"
 #include "target_specific.h"
 #include <Wire.h>
+#include "driver/uart.h"
 // #include <driver/rtc_io.h>
 
 #include "mesh/http/WiFiAPClient.h"
@@ -58,16 +59,16 @@
 using namespace concurrency;
 
 // We always create a screen object, but we only init it if we find the hardware
-graphics::Screen *screen;
+graphics::Screen* screen;
 
 // Global power status
-meshtastic::PowerStatus *powerStatus = new meshtastic::PowerStatus();
+meshtastic::PowerStatus* powerStatus = new meshtastic::PowerStatus();
 
 // Global GPS status
-meshtastic::GPSStatus *gpsStatus = new meshtastic::GPSStatus();
+meshtastic::GPSStatus* gpsStatus = new meshtastic::GPSStatus();
 
 // Global Node status
-meshtastic::NodeStatus *nodeStatus = new meshtastic::NodeStatus();
+meshtastic::NodeStatus* nodeStatus = new meshtastic::NodeStatus();
 
 /// The I2C address of our display (if found)
 uint8_t screen_found;
@@ -93,9 +94,11 @@ bool axp192_found;
 // Array map of sensor types (as array index) and i2c address as value we'll find in the i2c scan
 uint8_t nodeTelemetrySensorsMap[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-Router *router = NULL; // Users of router don't care what sort of subclass implements that API
+Router* router = NULL; // Users of router don't care what sort of subclass implements that API
 
-const char *getDeviceName()
+static const char *serial_tx_str = "Serial test\n\r";
+
+const char* getDeviceName()
 {
     uint8_t dmac[6];
 
@@ -107,7 +110,8 @@ const char *getDeviceName()
     // if the shortname exists and is NOT the new default of ab3c, use it for BLE name.
     if ((owner.short_name != NULL) && (strcmp(owner.short_name, name) != 0)) {
         sprintf(name, "%s_%02x%02x", owner.short_name, dmac[4], dmac[5]);
-    } else {
+    }
+    else {
         sprintf(name, "Meshtastic_%02x%02x", dmac[4], dmac[5]);
     }
     return name;
@@ -128,11 +132,11 @@ uint32_t timeLastPowered = 0;
 
 bool ButtonThread::shutdown_on_long_stop = false;
 
-static Periodic *ledPeriodic;
-static OSThread *powerFSMthread, *buttonThread;
+static Periodic* ledPeriodic;
+static OSThread* powerFSMthread, * buttonThread;
 uint32_t ButtonThread::longPressTime = 0;
 
-RadioInterface *rIf = NULL;
+RadioInterface* rIf = NULL;
 
 /**
  * Some platforms (nrf52) might provide an alterate version that supresses calling delay from sleep.
@@ -304,8 +308,8 @@ void setup()
         RECORD_CRITICALERROR(CriticalErrorCode_NoAXP192); // Record a hardware fault for missing hardware
 #endif
 
-        // Don't call screen setup until after nodedb is setup (because we need
-        // the current region name)
+    // Don't call screen setup until after nodedb is setup (because we need
+    // the current region name)
 #if defined(ST7735_CS) || defined(HAS_EINK) || defined(ILI9341_DRIVER)
     screen->setup();
 #else
@@ -341,7 +345,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find RF95 radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("RF95 Radio init succeeded, using RF95 radio\n");
         }
     }
@@ -354,7 +359,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find SX1262 radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("SX1262 Radio init succeeded, using SX1262 radio\n");
         }
     }
@@ -367,7 +373,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find SX1268 radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("SX1268 Radio init succeeded, using SX1268 radio\n");
         }
     }
@@ -380,7 +387,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find LLCC68 radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("LLCC68 Radio init succeeded, using LLCC68 radio\n");
         }
     }
@@ -393,7 +401,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find simulated radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("Using SIMULATED radio!\n");
         }
     }
@@ -435,6 +444,27 @@ void setup()
 
     // setBluetoothEnable(false); we now don't start bluetooth until we enter the proper state
     setCPUFast(false); // 80MHz is fine for our slow peripherals
+
+    //UART2 Set Up
+
+    uart_config_t uart_config = {
+            .baud_rate = 115200,
+            .data_bits = UART_DATA_8_BITS,
+            .parity = UART_PARITY_DISABLE,
+            .stop_bits = UART_STOP_BITS_1,
+            .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+    };
+    int intr_alloc_flags = 0;
+
+#if CONFIG_UART_ISR_IN_IRAM
+    intr_alloc_flags = ESP_INTR_FLAG_IRAM;
+#endif
+
+    int buf_size = 1024;
+
+    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, buf_size * 2, 0, 0, NULL, intr_alloc_flags));
+    ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
+    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 13, 14, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 }
 
 uint32_t rebootAtMsec;   // If not zero we will reboot at this time (used to reboot shortly after the update completes)
@@ -476,13 +506,17 @@ void loop()
 
     service.loop();
 
+    //Serial.println("serial test");
+    //Serial1.println("serial test");
+    //Serial2.println("serial test");
+
     long delayMsec = mainController.runOrDelay();
 
     /* if (mainController.nextThread && delayMsec)
         DEBUG_MSG("Next %s in %ld\n", mainController.nextThread->ThreadName.c_str(),
                   mainController.nextThread->tillRun(millis())); */
 
-    // We want to sleep as long as possible here - because it saves power
+                  // We want to sleep as long as possible here - because it saves power
     if (!runASAP && loopCanSleep()) {
         // if(delayMsec > 100) DEBUG_MSG("sleeping %ld\n", delayMsec);
         mainDelay.delay(delayMsec);

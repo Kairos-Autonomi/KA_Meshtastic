@@ -166,6 +166,7 @@ class ButtonThread : public concurrency::OSThread
     static void userButtonMultiPressed()
     {
 #ifndef NO_ESP32
+
         clearNVS();
 #endif
 #ifdef NRF52_SERIES
