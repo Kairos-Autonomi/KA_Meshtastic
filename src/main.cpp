@@ -8,6 +8,8 @@
 #include "buzz.h"
 #include "error.h"
 #include "power.h"
+#include "plugins/CannedMessagePlugin.h"
+#include "plugins/TriggerPlugin.h"
 // #include "rom/rtc.h"
 #include "DSRRouter.h"
 // #include "debug.h"
@@ -334,7 +336,8 @@ class ButtonThread : public OSThread
     static void userButtonDoublePressed()
     {
 #ifndef NO_ESP32
-        disablePin();
+        triggerPlugin->AttemptLink();
+        //disablePin();
 #elif defined(HAS_EINK)
         digitalWrite(PIN_EINK_EN,digitalRead(PIN_EINK_EN) == LOW);
 #endif
