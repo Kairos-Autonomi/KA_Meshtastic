@@ -11,16 +11,16 @@ TriggerPlugin::TriggerPlugin() : concurrency::OSThread("trigger"){
 
 void TriggerPlugin::AttemptLink()
 {
-    if(!linkReqd){
-        cannedMessagePlugin->sendText(NODENUM_BROADCAST, "linkReq", false);
-    }else{
-        cannedMessagePlugin->sendText(reqd_from, "linkAck", false);
-    }
+        if(!linkReqd){
+            cannedMessagePlugin->sendText(NODENUM_BROADCAST, "linkReq", false);
+        }else{
+            cannedMessagePlugin->sendText(reqd_from, "linkAck", false);
+        }
 }
 
 void TriggerPlugin::SendTrigger(){
-    if(isLinked){
-        cannedMessagePlugin->sendText(linked_id, "trigger", false);
+    if(devicestate.is_linked){
+        cannedMessagePlugin->sendText(devicestate.linked_id, "trigger", false);
     }
 }
 

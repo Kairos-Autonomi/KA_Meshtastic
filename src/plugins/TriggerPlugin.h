@@ -7,10 +7,8 @@ class TriggerPlugin:private concurrency::OSThread
 {
   public:
     bool isAttemptingLink = false;
-    bool isLinked = false;
     bool hasReceivedLinkConf = false;
     unsigned int reqd_from = __UINT32_MAX__;
-    unsigned int linked_id = __UINT32_MAX__;
     bool linkReqd = false;
 
     /** Constructor

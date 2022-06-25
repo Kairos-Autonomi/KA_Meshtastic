@@ -22,14 +22,16 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
         triggerPlugin->reqd_from = mp.from;
     }
     else if(strcmp(cmd, "linkAck") == 0){
-        triggerPlugin->isLinked = true;
-        triggerPlugin->linked_id = mp.from;
+        devicestate.is_linked = true;
+        devicestate.linked_id = mp.from;
+        nodeDB.saveToDisk();
         cannedMessagePlugin->sendText(mp.from, "linkConf", false);
         cannedMessagePlugin->sendText(NODENUM_BROADCAST, "reqComp", false);
     }
     else if(strcmp(cmd, "linkConf") == 0){
-        triggerPlugin->isLinked = true;
-        triggerPlugin->linked_id = mp.from;
+        devicestate.is_linked = true;
+        devicestate.linked_id = mp.from;
+        nodeDB.saveToDisk();
     }
     else if(strcmp(cmd, "reqComp") == 0){
         triggerPlugin->linkReqd = false;
