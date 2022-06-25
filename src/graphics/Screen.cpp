@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sleep.h"
 #include "target_specific.h"
 #include "utils.h"
+#include "plugins/TriggerPlugin.h"
 
 #ifndef NO_ESP32
 #include "esp_task_wdt.h"
@@ -54,7 +55,7 @@ namespace graphics
 // DEBUG
 #define NUM_EXTRA_FRAMES 3 // text message and debug frame
 // if defined a pixel will blink to show redraws
-// #define SHOW_REDRAWS
+#define SHOW_REDRAWS
 
 // A text message frame + debug frame + all the node infos
 static FrameCallback normalFrames[MAX_NUM_NODES + NUM_EXTRA_FRAMES];
@@ -241,6 +242,13 @@ static void drawFrameFirmware(OLEDDisplay *display, OLEDDisplayUiState *state, i
 
     // display->setFont(FONT_LARGE);
     // display->drawString(64 + x, 26 + y, btPIN);
+}
+
+static void drawLinkingFrame(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
+{
+    display->setTextAlignment(TEXT_ALIGN_LEFT);
+    display->setFont(FONT_MEDIUM);
+    display->drawString(0 + x, 0 + y, "Linking...");
 }
 
 /// Draw the last text message we received
@@ -999,6 +1007,10 @@ void Screen::setFrames()
     }
 
     DEBUG_MSG("Added plugins.  numframes: %d\n", numframes);
+
+    // if(triggerPlugin->isAttemptingLink){
+    //     normalFrames[numframes++] = drawLinkingFrame;
+    // }
 
     // If we have a critical fault, show it first
     if (myNodeInfo.error_code)

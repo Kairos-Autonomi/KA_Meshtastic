@@ -6,18 +6,37 @@
 
 TriggerPlugin* triggerPlugin;
 
-TriggerPlugin::TriggerPlugin(){
-
+TriggerPlugin::TriggerPlugin() : concurrency::OSThread("trigger"){
 }
 
 void TriggerPlugin::AttemptLink()
 {
-    isAttemptingLink = true;
-    for (int i = 0; i < 20; i++) {
-        cannedMessagePlugin->sendText(NODENUM_BROADCAST, "linkReq", true);
-        delay(800);
-        // if(hasReceivedLinkConf){
-        //     break;
-        // }
+    if(!linkReqd){
+        cannedMessagePlugin->sendText(NODENUM_BROADCAST, "linkReq", false);
+    }else{
+        cannedMessagePlugin->sendText(reqd_from, "linkAck", false);
     }
+}
+
+void TriggerPlugin::SendTrigger(){
+    if(isLinked){
+        cannedMessagePlugin->sendText(linked_id, "trigger", false);
+    }
+}
+
+int32_t TriggerPlugin::runOnce(){
+    // if(isAttemptingLink && millis() - timeAtLastReq > 800 && !isLinked){
+    //     num_reqs_sent++;
+    //     char buffer[20] = "";
+    //     char tempbuff[5];
+    //     strcat(buffer, "linkReq ");
+    //     strcat(buffer, itoa(num_reqs_sent, tempbuff, 10));
+    //     Serial.println(buffer);
+    //     cannedMessagePlugin->sendText(NODENUM_BROADCAST, buffer, false);
+    //     timeAtLastReq = millis();
+    // }
+    // if(num_reqs_sent >= 20 || isLinked){
+    //     isAttemptingLink = false;
+    // }
+    // return 100;
 }
