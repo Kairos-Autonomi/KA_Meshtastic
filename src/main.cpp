@@ -351,7 +351,10 @@ class ButtonThread : public OSThread
     static void userButtonMultiPressed()
     {
 #ifndef NO_ESP32
-        clearNVS();
+        devicestate.is_linked = false;
+        devicestate.linked_id = INT32_MAX;
+        nodeDB.saveToDisk();
+        //clearNVS();
 #endif
 #ifdef NRF52_SERIES
         clearBonds();
