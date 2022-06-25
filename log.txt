@@ -1,0 +1,4 @@
+YOINK! BT: 176648 heap size
+YOINK! BT: 176500 heap size
+YOINK! BT: 176356 heap size
+YOINK! BT: 176284 heap size

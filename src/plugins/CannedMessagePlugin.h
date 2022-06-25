@@ -38,14 +38,14 @@ class CannedMessagePlugin :
     void eventDown();
     void eventSelect();
 
-  protected:
-
-    virtual int32_t runOnce() override;
-
     void sendText(
         NodeNum dest,
         const char* message,
         bool wantReplies);
+
+  protected:
+
+    virtual int32_t runOnce() override;
 
     int splitConfiguredMessages();
     int getNextIndex();

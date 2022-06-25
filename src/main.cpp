@@ -8,6 +8,8 @@
 #include "buzz.h"
 #include "error.h"
 #include "power.h"
+#include "plugins/CannedMessagePlugin.h"
+#include "plugins/TriggerPlugin.h"
 // #include "rom/rtc.h"
 #include "DSRRouter.h"
 // #include "debug.h"
@@ -23,6 +25,8 @@
 #include "target_specific.h"
 #include <OneButton.h>
 #include <Wire.h>
+#include "driver/uart.h"
+
 // #include <driver/rtc_io.h>
 
 #include "mesh/http/WiFiAPClient.h"
@@ -305,7 +309,10 @@ class ButtonThread : public OSThread
     {
         // DEBUG_MSG("Long press!\n");
 #ifndef NRF52_SERIES
-        screen->adjustBrightness();
+        //screen->adjustBrightness();
+
+        triggerPlugin->SendTrigger();
+
 #endif
         // If user button is held down for 5 seconds, shutdown the device.
         if (millis() - longPressTime > 5 * 1000) {
@@ -334,7 +341,8 @@ class ButtonThread : public OSThread
     static void userButtonDoublePressed()
     {
 #ifndef NO_ESP32
-        disablePin();
+        triggerPlugin->AttemptLink();
+        //disablePin();
 #elif defined(HAS_EINK)
         digitalWrite(PIN_EINK_EN,digitalRead(PIN_EINK_EN) == LOW);
 #endif
@@ -682,6 +690,27 @@ void setup()
 
     // setBluetoothEnable(false); we now don't start bluetooth until we enter the proper state
     setCPUFast(false); // 80MHz is fine for our slow peripherals
+
+    //UART2 Set Up
+
+    uart_config_t uart_config = {
+            .baud_rate = 115200,
+            .data_bits = UART_DATA_8_BITS,
+            .parity = UART_PARITY_DISABLE,
+            .stop_bits = UART_STOP_BITS_1,
+            .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+    };
+    int intr_alloc_flags = 0;
+
+    #if CONFIG_UART_ISR_IN_IRAM
+        intr_alloc_flags = ESP_INTR_FLAG_IRAM;
+    #endif
+
+    int buf_size = 1024;
+
+    ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, buf_size * 2, 0, 0, NULL, intr_alloc_flags));
+    ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
+    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 13, 14, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 }
 
 #if 0
