@@ -24,6 +24,12 @@ void TriggerPlugin::SendTrigger(){
     }
 }
 
+void TriggerPlugin::SendLinkTerm(){
+    if(devicestate.is_linked){
+        cannedMessagePlugin->sendText(NODENUM_BROADCAST, "linkTerm", false);
+    }
+}
+
 int32_t TriggerPlugin::runOnce(){
     // if(isAttemptingLink && millis() - timeAtLastReq > 800 && !isLinked){
     //     num_reqs_sent++;

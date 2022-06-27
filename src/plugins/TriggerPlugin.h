@@ -17,6 +17,7 @@ class TriggerPlugin:private concurrency::OSThread
     TriggerPlugin();
     void AttemptLink();
     void SendTrigger();
+    void SendLinkTerm();
 
   protected:
     int32_t timeAtLastReq = 0;

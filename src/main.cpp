@@ -311,8 +311,6 @@ class ButtonThread : public OSThread
 #ifndef NRF52_SERIES
         //screen->adjustBrightness();
 
-        triggerPlugin->SendTrigger();
-
 #endif
         // If user button is held down for 5 seconds, shutdown the device.
         if (millis() - longPressTime > 5 * 1000) {
@@ -341,7 +339,13 @@ class ButtonThread : public OSThread
     static void userButtonDoublePressed()
     {
 #ifndef NO_ESP32
-        triggerPlugin->AttemptLink();
+        if(devicestate.is_linked){
+            triggerPlugin->SendTrigger();
+        }
+        else{
+            triggerPlugin->AttemptLink();
+        }
+        
         //disablePin();
 #elif defined(HAS_EINK)
         digitalWrite(PIN_EINK_EN,digitalRead(PIN_EINK_EN) == LOW);
@@ -351,8 +355,11 @@ class ButtonThread : public OSThread
     static void userButtonMultiPressed()
     {
 #ifndef NO_ESP32
+        triggerPlugin->SendLinkTerm();
+        triggerPlugin->linkReqd = false;
         devicestate.is_linked = false;
         devicestate.linked_id = INT32_MAX;
+        strcpy(devicestate.linked_name, "");
         nodeDB.saveToDisk();
         //clearNVS();
 #endif

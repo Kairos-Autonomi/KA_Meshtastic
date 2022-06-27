@@ -142,11 +142,43 @@ static void drawIconScreen(const char *upperMsg, OLEDDisplay *display, OLEDDispl
     // FIXME - draw serial # somewhere?
 }
 
+/**
+ * Draw the icon with extra info printed around the corners
+ */
+static void drawKairosScreen(const char *upperMsg, OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
+{
+    // draw an xbm image.
+    // Please note that everything that should be transitioned
+    // needs to be drawn relative to x and y
+
+    // draw centered icon left to right and centered above the one line of app text
+    display->drawXbm(x + (SCREEN_WIDTH - kairos_width) / 2, y + (SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM - kairos_height) / 2 + 2,
+                     kairos_width, kairos_height, (const uint8_t *)kairos_bits);
+
+    display->setFont(FONT_MEDIUM);
+    display->setTextAlignment(TEXT_ALIGN_LEFT);
+    const char *title = "meshtastic.org";
+    display->drawString(x + getStringCenteredX(title), y + SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM, title);
+    display->setFont(FONT_SMALL);
+
+    // Draw region in upper left
+    if (upperMsg)
+        display->drawString(x + 0, y + 0, upperMsg);
+
+    // Draw version in upper right
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%s",
+             xstr(APP_VERSION_SHORT)); // Note: we don't bother printing region or now, it makes the string too long
+    display->drawString(x + SCREEN_WIDTH - display->getStringWidth(buf), y + 0, buf);
+    screen->forceDisplay();
+}
+
 static void drawBootScreen(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
 {
     // Draw region in upper left
     const char *region = myRegion ? myRegion->name : NULL;
-    drawIconScreen(region, display, state, x, y);
+    //drawIconScreen(region, display, state, x, y);
+    drawKairosScreen(region, display, state, x, y);
 }
 
 // Used on boot when a certificate is being created
@@ -1185,7 +1217,13 @@ void DebugInfo::drawFrame(OLEDDisplay *display, OLEDDisplayUiState *state, int16
     display->drawString(x + SCREEN_WIDTH - display->getStringWidth(ourId), y + FONT_HEIGHT_SMALL, ourId);
 
     // Draw any log messages
-    display->drawLogBuffer(x, y + (FONT_HEIGHT_SMALL * 2));
+    //display->drawLogBuffer(x, y + (FONT_HEIGHT_SMALL * 2));
+
+    if(devicestate.is_linked){
+        char tempbuf[15];
+        display->drawString(x, y + (FONT_HEIGHT_SMALL * 2), "Linked:");
+        display->drawString(x, y + (FONT_HEIGHT_SMALL * 3), (char*)devicestate.linked_name);
+    }
 
     /* Display a heartbeat pixel that blinks every time the frame is redrawn */
 #ifdef SHOW_REDRAWS

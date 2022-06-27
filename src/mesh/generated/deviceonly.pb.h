@@ -50,6 +50,7 @@ typedef struct _DeviceState {
     char canned_message_plugin_message_part5[200];
     uint32_t is_linked;
     uint32_t linked_id;
+    char linked_name[40];
 } DeviceState;
 
 
@@ -60,11 +61,11 @@ extern "C" {
 /* Initializer values for message structs */
 #define LegacyRadioConfig_init_default           {false, LegacyRadioConfig_LegacyPreferences_init_default}
 #define LegacyRadioConfig_LegacyPreferences_init_default {_RegionCode_MIN}
-#define DeviceState_init_default                 {false, LegacyRadioConfig_init_default, false, MyNodeInfo_init_default, false, User_init_default, 0, {NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default}, 0, {MeshPacket_init_default}, false, MeshPacket_init_default, 0, 0, 0, "", "", "", "", "", 0, 0}
+#define DeviceState_init_default                 {false, LegacyRadioConfig_init_default, false, MyNodeInfo_init_default, false, User_init_default, 0, {NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default, NodeInfo_init_default}, 0, {MeshPacket_init_default}, false, MeshPacket_init_default, 0, 0, 0, "", "", "", "", "", 0, 0, ""}
 #define ChannelFile_init_default                 {0, {Channel_init_default, Channel_init_default, Channel_init_default, Channel_init_default, Channel_init_default, Channel_init_default, Channel_init_default, Channel_init_default}}
 #define LegacyRadioConfig_init_zero              {false, LegacyRadioConfig_LegacyPreferences_init_zero}
 #define LegacyRadioConfig_LegacyPreferences_init_zero {_RegionCode_MIN}
-#define DeviceState_init_zero                    {false, LegacyRadioConfig_init_zero, false, MyNodeInfo_init_zero, false, User_init_zero, 0, {NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero}, 0, {MeshPacket_init_zero}, false, MeshPacket_init_zero, 0, 0, 0, "", "", "", "", "", 0, 0}
+#define DeviceState_init_zero                    {false, LegacyRadioConfig_init_zero, false, MyNodeInfo_init_zero, false, User_init_zero, 0, {NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero, NodeInfo_init_zero}, 0, {MeshPacket_init_zero}, false, MeshPacket_init_zero, 0, 0, 0, "", "", "", "", "", 0, 0, ""}
 #define ChannelFile_init_zero                    {0, {Channel_init_zero, Channel_init_zero, Channel_init_zero, Channel_init_zero, Channel_init_zero, Channel_init_zero, Channel_init_zero, Channel_init_zero}}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -87,6 +88,7 @@ extern "C" {
 #define DeviceState_canned_message_plugin_message_part5_tag 17
 #define DeviceState_is_linked_tag                18
 #define DeviceState_linked_id_tag                19
+#define DeviceState_linked_name_tag              20
 
 /* Struct field encoding specification for nanopb */
 #define LegacyRadioConfig_FIELDLIST(X, a) \
@@ -116,7 +118,8 @@ X(a, STATIC,   SINGULAR, STRING,   canned_message_plugin_message_part3,  15) \
 X(a, STATIC,   SINGULAR, STRING,   canned_message_plugin_message_part4,  16) \
 X(a, STATIC,   SINGULAR, STRING,   canned_message_plugin_message_part5,  17) \
 X(a, STATIC,   SINGULAR, UINT32,   is_linked,        18) \
-X(a, STATIC,   SINGULAR, UINT32,   linked_id,        19)
+X(a, STATIC,   SINGULAR, UINT32,   linked_id,        19) \
+X(a, STATIC,   SINGULAR, STRING,   linked_name,      20)
 #define DeviceState_CALLBACK NULL
 #define DeviceState_DEFAULT NULL
 #define DeviceState_legacyRadio_MSGTYPE LegacyRadioConfig
@@ -146,7 +149,7 @@ extern const pb_msgdesc_t ChannelFile_msg;
 /* Maximum encoded size of messages (where known) */
 #define LegacyRadioConfig_size                   4
 #define LegacyRadioConfig_LegacyPreferences_size 2
-#define DeviceState_size                         11028
+#define DeviceState_size                         11070
 #define ChannelFile_size                         832
 
 #ifdef __cplusplus
