@@ -25,9 +25,7 @@ void TriggerPlugin::SendTrigger(){
 }
 
 void TriggerPlugin::SendLinkTerm(){
-    if(devicestate.is_linked){
         cannedMessagePlugin->sendText(NODENUM_BROADCAST, "linkTerm", false);
-    }
 }
 
 int32_t TriggerPlugin::runOnce(){

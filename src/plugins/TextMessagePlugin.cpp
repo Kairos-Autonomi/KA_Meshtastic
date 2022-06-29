@@ -5,8 +5,11 @@
 #include "CannedMessagePlugin.h"
 #include "TriggerPlugin.h"
 #include "driver/uart.h"
+#include "graphics/Screen.h"
 
 TextMessagePlugin *textMessagePlugin;
+
+//extern graphics::Screen *screen;
 
 ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
 {
@@ -42,6 +45,7 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
             devicestate.linked_id = mp.from;
             strcpy(devicestate.linked_name, node->user.long_name);
             nodeDB.saveToDisk();
+            //screen->goToStatusScreen();
             cannedMessagePlugin->sendText(mp.from, "linkConf", false);
             cannedMessagePlugin->sendText(NODENUM_BROADCAST, "reqComp", false);
         }
@@ -52,6 +56,9 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
         devicestate.linked_id = mp.from;
         strcpy(devicestate.linked_name, node->user.long_name);
         nodeDB.saveToDisk();
+
+
+        //screen->goToStatusScreen();
     }
     else if(strcmp(cmd, "reqComp") == 0){
         triggerPlugin->linkReqd = false;
@@ -59,8 +66,22 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
     else if(strcmp(cmd, "trigger")==0){
         Serial.println("got trigger");
         if(devicestate.is_linked && mp.from == devicestate.linked_id){
-            const int len = strlen((char*)p.payload.bytes);
-            const int txBytes = uart_write_bytes(UART_NUM_2, "trigger fire\n\r", len);
+            char msg[50] = "trigger enable\n\r";
+            int len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
+
+            delay(200);
+
+            strcpy(msg, "trigger arm\n\r");
+            len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
+
+            delay(200);
+
+            strcpy(msg, "trigger fire\n\r");
+            len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
+
             Serial.println("acted on trigger");
         }
         else{

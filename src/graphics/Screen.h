@@ -164,6 +164,8 @@ class Screen : public concurrency::OSThread
     /// Stops showing the boot screen.
     void stopBootScreen() { enqueueCmd(ScreenCmd{.cmd = Cmd::STOP_BOOT_SCREEN}); }
 
+    void goToStatusScreen() { enqueueCmd(ScreenCmd{.cmd = Cmd::SWITCH_FRAME}); }
+
     /// Writes a string to the screen.
     void print(const char *text)
     {
@@ -269,6 +271,7 @@ class Screen : public concurrency::OSThread
     void handlePrint(const char *text);
     void handleStartFirmwareUpdateScreen();
     void handleShutdownScreen();
+    void handleSwitchFrame();
     /// Rebuilds our list of frames (screens) to default ones.
     void setFrames();
 

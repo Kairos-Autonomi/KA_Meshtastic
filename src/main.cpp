@@ -704,7 +704,7 @@ void setup()
     //UART2 Set Up
 
     uart_config_t uart_config = {
-            .baud_rate = 115200,
+            .baud_rate = 38400,
             .data_bits = UART_DATA_8_BITS,
             .parity = UART_PARITY_DISABLE,
             .stop_bits = UART_STOP_BITS_1,
@@ -720,7 +720,7 @@ void setup()
 
     ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, buf_size * 2, 0, 0, NULL, intr_alloc_flags));
     ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
-    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 13, 14, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 0, 4, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 }
 
 #if 0

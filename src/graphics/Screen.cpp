@@ -152,13 +152,9 @@ static void drawKairosScreen(const char *upperMsg, OLEDDisplay *display, OLEDDis
     // needs to be drawn relative to x and y
 
     // draw centered icon left to right and centered above the one line of app text
-    display->drawXbm(x + (SCREEN_WIDTH - kairos_width) / 2, y + (SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM - kairos_height) / 2 + 2,
+    display->drawXbm(x + (SCREEN_WIDTH - kairos_width) / 2, y + (SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM - kairos_height + 20) / 2 + 2,
                      kairos_width, kairos_height, (const uint8_t *)kairos_bits);
 
-    display->setFont(FONT_MEDIUM);
-    display->setTextAlignment(TEXT_ALIGN_LEFT);
-    const char *title = "meshtastic.org";
-    display->drawString(x + getStringCenteredX(title), y + SCREEN_HEIGHT - FONT_HEIGHT_MEDIUM, title);
     display->setFont(FONT_SMALL);
 
     // Draw region in upper left
@@ -930,6 +926,9 @@ int32_t Screen::runOnce()
         case Cmd::START_SHUTDOWN_SCREEN:
             handleShutdownScreen();
             break;
+        case Cmd::SWITCH_FRAME:
+            handleSwitchFrame();
+            break;
         default:
             DEBUG_MSG("BUG: invalid cmd\n");
         }
@@ -1098,6 +1097,10 @@ void Screen::handleStartBluetoothPinScreen(uint32_t pin)
     ui.disableAllIndicators();
     ui.setFrames(btFrames, 1);
     setFastFramerate();
+}
+
+void Screen::handleSwitchFrame(){
+    ui.switchToFrame(2);
 }
 
 void Screen::handleShutdownScreen()
