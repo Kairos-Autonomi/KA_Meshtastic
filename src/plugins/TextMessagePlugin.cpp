@@ -7,18 +7,18 @@
 #include "driver/uart.h"
 #include "graphics/Screen.h"
 
-TextMessagePlugin *textMessagePlugin;
+TextMessagePlugin* textMessagePlugin;
 
 // extern graphics::Screen *screen;
 
-ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
+ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
 {
     bool ignore = false;
-    auto &p = mp.decoded;
+    auto& p = mp.decoded;
     DEBUG_MSG("Received text msg from=0x%0x, id=0x%x, msg=%.*s\n", mp.from, mp.id, p.payload.size, p.payload.bytes);
 
-    char *cmd = strtok((char *)p.payload.bytes, " ");
-    char *sarg1 = strtok(NULL, " ");
+    char* cmd = strtok((char*)p.payload.bytes, " ");
+    char* sarg1 = strtok(NULL, " ");
 
     if (strcmp(cmd, "linkReq") == 0) {
         if (devicestate.is_linked && mp.from == devicestate.linked_id) {
@@ -26,18 +26,21 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
             devicestate.linked_id = INT32_MAX;
             strcpy(devicestate.linked_name, "");
             nodeDB.saveToDisk();
-        } else {
+        }
+        else {
             triggerPlugin->linkReqd = true;
             triggerPlugin->reqd_from = mp.from;
         }
-    } else if (strcmp(cmd, "linkAck") == 0) {
+    }
+    else if (strcmp(cmd, "linkAck") == 0) {
         if (devicestate.is_linked && mp.from == devicestate.linked_id) {
             devicestate.is_linked = false;
             devicestate.linked_id = INT32_MAX;
             strcpy(devicestate.linked_name, "");
             nodeDB.saveToDisk();
-        } else {
-            NodeInfo *node = nodeDB.getNode(getFrom(&mp));
+        }
+        else {
+            NodeInfo* node = nodeDB.getNode(getFrom(&mp));
             devicestate.is_linked = true;
             devicestate.linked_id = mp.from;
             strcpy(devicestate.linked_name, node->user.long_name);
@@ -46,61 +49,67 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
             cannedMessagePlugin->sendText(mp.from, "linkConf", false);
             cannedMessagePlugin->sendText(NODENUM_BROADCAST, "reqComp", false);
         }
-    } else if (strcmp(cmd, "linkConf") == 0) {
-        NodeInfo *node = nodeDB.getNode(getFrom(&mp));
+    }
+    else if (strcmp(cmd, "linkConf") == 0) {
+        NodeInfo* node = nodeDB.getNode(getFrom(&mp));
         devicestate.is_linked = true;
         devicestate.linked_id = mp.from;
         strcpy(devicestate.linked_name, node->user.long_name);
         nodeDB.saveToDisk();
 
         // screen->goToStatusScreen();
-    } else if (strcmp(cmd, "reqComp") == 0) {
+    }
+    else if (strcmp(cmd, "reqComp") == 0) {
         triggerPlugin->linkReqd = false;
-    } else if (strcmp(cmd, "trigger") == 0) {
+    }
+    else if (strcmp(cmd, "trigger") == 0) {
         Serial.println("got trigger");
-        if (strcmp(sarg1, "override") == 0) {
-                char msg[50] = "trigger enable\n\r";
-                int len = strlen(msg);
-                uart_write_bytes(UART_NUM_2, msg, len);
+        Serial.println("is not override");
+        if (devicestate.is_linked && mp.from == devicestate.linked_id) {
+            char msg[50] = "trigger enable\n\r";
+            int len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
 
-                delay(200);
+            delay(200);
 
-                strcpy(msg, "trigger arm\n\r");
-                len = strlen(msg);
-                uart_write_bytes(UART_NUM_2, msg, len);
+            strcpy(msg, "trigger arm\n\r");
+            len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
 
-                delay(200);
+            delay(200);
 
-                strcpy(msg, "trigger fire\n\r");
-                len = strlen(msg);
-                uart_write_bytes(UART_NUM_2, msg, len);
+            strcpy(msg, "trigger fire\n\r");
+            len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
 
-                Serial.println("acted on trigger");
-        } else {
-            if (devicestate.is_linked && mp.from == devicestate.linked_id) {
-                char msg[50] = "trigger enable\n\r";
-                int len = strlen(msg);
-                uart_write_bytes(UART_NUM_2, msg, len);
-
-                delay(200);
-
-                strcpy(msg, "trigger arm\n\r");
-                len = strlen(msg);
-                uart_write_bytes(UART_NUM_2, msg, len);
-
-                delay(200);
-
-                strcpy(msg, "trigger fire\n\r");
-                len = strlen(msg);
-                uart_write_bytes(UART_NUM_2, msg, len);
-
-                Serial.println("acted on trigger");
-            } else {
-                ignore = true;
-                Serial.println("ignored trigger");
-            }
+            Serial.println("acted on trigger");
         }
-    } else if (strcmp(cmd, "linkTerm") == 0) {
+        else {
+            ignore = true;
+            Serial.println("ignored trigger");
+        }
+    }
+    else if(strcmp(cmd, "triggeroverride") == 0){
+        Serial.println("is override");
+        char msg[50] = "trigger enable\n\r";
+        int len = strlen(msg);
+        uart_write_bytes(UART_NUM_2, msg, len);
+
+        delay(200);
+
+        strcpy(msg, "trigger arm\n\r");
+        len = strlen(msg);
+        uart_write_bytes(UART_NUM_2, msg, len);
+
+        delay(200);
+
+        strcpy(msg, "trigger fire\n\r");
+        len = strlen(msg);
+        uart_write_bytes(UART_NUM_2, msg, len);
+
+        Serial.println("acted on trigger");
+    }
+    else if (strcmp(cmd, "linkTerm") == 0) {
         if (mp.from == devicestate.linked_id) {
             triggerPlugin->linkReqd = false;
             devicestate.is_linked = false;
@@ -109,7 +118,8 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket &mp)
             nodeDB.saveToDisk();
             triggerPlugin->SendLinkTerm();
         }
-    } else {
+    }
+    else {
         Serial.println("unknown Text:");
         Serial.println(cmd);
     }
