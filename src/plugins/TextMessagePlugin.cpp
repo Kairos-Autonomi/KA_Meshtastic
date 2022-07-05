@@ -64,25 +64,10 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     }
     else if (strcmp(cmd, "trigger") == 0) {
         Serial.println("got trigger");
-        Serial.println("is not override");
-        if (devicestate.is_linked && mp.from == devicestate.linked_id) {
-            char msg[50] = "trigger enable\n\r";
-            int len = strlen(msg);
-            uart_write_bytes(UART_NUM_2, msg, len);
-
-            delay(200);
-
-            strcpy(msg, "trigger arm\n\r");
-            len = strlen(msg);
-            uart_write_bytes(UART_NUM_2, msg, len);
-
-            delay(200);
-
-            strcpy(msg, "trigger fire\n\r");
-            len = strlen(msg);
-            uart_write_bytes(UART_NUM_2, msg, len);
-
-            Serial.println("acted on trigger");
+        if(devicestate.is_linked && mp.from == devicestate.linked_id){
+            digitalWrite(13, HIGH);
+            delay(1000);
+            digitalWrite(13, LOW);
         }
         else {
             ignore = true;
@@ -91,21 +76,9 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     }
     else if(strcmp(cmd, "triggeroverride") == 0){
         Serial.println("is override");
-        char msg[50] = "trigger enable\n\r";
-        int len = strlen(msg);
-        uart_write_bytes(UART_NUM_2, msg, len);
-
-        delay(200);
-
-        strcpy(msg, "trigger arm\n\r");
-        len = strlen(msg);
-        uart_write_bytes(UART_NUM_2, msg, len);
-
-        delay(200);
-
-        strcpy(msg, "trigger fire\n\r");
-        len = strlen(msg);
-        uart_write_bytes(UART_NUM_2, msg, len);
+        digitalWrite(13, HIGH);
+        delay(1000);
+        digitalWrite(13, LOW);
 
         Serial.println("acted on trigger");
     }

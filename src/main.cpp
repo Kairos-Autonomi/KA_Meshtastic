@@ -701,6 +701,10 @@ void setup()
     // setBluetoothEnable(false); we now don't start bluetooth until we enter the proper state
     setCPUFast(false); // 80MHz is fine for our slow peripherals
 
+    //relay control setup
+    pinMode(13, OUTPUT);
+    digitalWrite(13, LOW);
+
     //UART2 Set Up
 
     uart_config_t uart_config = {
