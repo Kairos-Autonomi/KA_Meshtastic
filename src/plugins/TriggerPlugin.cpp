@@ -43,4 +43,25 @@ int32_t TriggerPlugin::runOnce(){
     //     isAttemptingLink = false;
     // }
     // return 100;
+
+    char pos_json[1000];
+    char intbuf[16];
+    strcpy(pos_json, "[");
+    for(int i = 0; i < nodeDB.getNumNodes(); i++){
+        NodeInfo node = *nodeDB.getNodeByIndex(i);
+        strcat(pos_json, "{\"id\":\"");
+        strcat(pos_json, node.user.id);
+        strcat(pos_json, "\",\"name\":\"");
+        strcat(pos_json, node.user.long_name);
+        strcat(pos_json, "\",\"lat\":");
+        strcat(pos_json, itoa(node.position.latitude_i, intbuf, 10));
+        strcat(pos_json, ",\"lon\":");
+        strcat(pos_json, itoa(node.position.longitude_i, intbuf, 10));
+        strcat(pos_json, "},");
+    }
+    pos_json[strlen(pos_json)-1] = 0;
+    strcat(pos_json, "]");
+
+    Serial.println(pos_json);
+    return 500;
 }
