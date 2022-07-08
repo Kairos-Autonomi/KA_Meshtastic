@@ -160,7 +160,7 @@ protected:
         }
         else if (radioConfig.preferences.on_battery_shutdown_after_secs > 0 &&
             millis() > timeLastPowered + (1000 * radioConfig.preferences.on_battery_shutdown_after_secs)) { //shutdown after 30 minutes unpowered
-            powerFSM.trigger(EVENT_SHUTDOWN);
+            //powerFSM.trigger(EVENT_SHUTDOWN);
         }
 
         return 10;
