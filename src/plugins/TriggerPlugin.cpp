@@ -104,6 +104,10 @@ int32_t TriggerPlugin::runOnce(){
 
     Serial.println(pos_json);
 
+    if(isArmed && !lastArmedState){
+        
+    }
+
     lastArmedState = isArmed;
 
     return 500;
