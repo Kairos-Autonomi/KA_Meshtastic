@@ -1,4 +1,5 @@
 #pragma once
+#include "ESP32Servo/src/ESP32Servo.h"
 
 /**
  * Text message handling for meshtastic - draws on the OLED display the most recent received message
@@ -19,7 +20,12 @@ class TriggerPlugin:private concurrency::OSThread
     void SendTrigger();
     void SendLinkTerm();
 
+    void TriggerServo();
+    void TriggerRelay();
+    void TriggerSerial();
+
   protected:
+    Servo triggerServo;
     int32_t timeAtLastReq = 0;
     int num_reqs_sent = 0;
 
