@@ -65,9 +65,7 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     else if (strcmp(cmd, "trigger") == 0) {
         Serial.println("got trigger");
         if(devicestate.is_linked && mp.from == devicestate.linked_id){
-            digitalWrite(13, HIGH);
-            delay(1000);
-            digitalWrite(13, LOW);
+            triggerPlugin->TriggerServo();
         }
         else {
             ignore = true;
@@ -76,9 +74,7 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     }
     else if(strcmp(cmd, "triggeroverride") == 0){
         Serial.println("is override");
-        digitalWrite(13, HIGH);
-        delay(1000);
-        digitalWrite(13, LOW);
+        triggerPlugin->TriggerServo();
 
         Serial.println("acted on trigger");
     }

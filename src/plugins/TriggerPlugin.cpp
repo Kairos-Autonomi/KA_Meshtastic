@@ -3,10 +3,14 @@
 #include "NodeDB.h"
 #include "PowerFSM.h"
 #include "CannedMessagePlugin.h"
+#include "driver/uart.h"
 
 TriggerPlugin* triggerPlugin;
 
 TriggerPlugin::TriggerPlugin() : concurrency::OSThread("trigger"){
+    triggerServo.setPeriodHertz(50);
+    triggerServo.attach(15);
+    triggerServo.writeMicroseconds(2000);
 }
 
 void TriggerPlugin::AttemptLink()
@@ -26,6 +30,36 @@ void TriggerPlugin::SendTrigger(){
 
 void TriggerPlugin::SendLinkTerm(){
         cannedMessagePlugin->sendText(NODENUM_BROADCAST, "linkTerm", false);
+}
+
+void TriggerPlugin::TriggerServo(){
+    triggerServo.writeMicroseconds(1000);
+    delay(1000);
+    triggerServo.writeMicroseconds(2000);
+}
+
+void TriggerPlugin::TriggerRelay(){
+    digitalWrite(13, HIGH);
+    delay(1000);
+    digitalWrite(13, LOW);
+}
+
+void TriggerPlugin::TriggerSerial(){
+    char msg[50] = "trigger enable\n\r";
+            int len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
+
+            delay(200);
+
+            strcpy(msg, "trigger arm\n\r");
+            len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
+
+            delay(200);
+
+            strcpy(msg, "trigger fire\n\r");
+            len = strlen(msg);
+            uart_write_bytes(UART_NUM_2, msg, len);
 }
 
 int32_t TriggerPlugin::runOnce(){
@@ -65,3 +99,5 @@ int32_t TriggerPlugin::runOnce(){
     Serial.println(pos_json);
     return 500;
 }
+
+
