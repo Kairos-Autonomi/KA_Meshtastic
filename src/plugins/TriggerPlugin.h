@@ -22,6 +22,7 @@ class TriggerPlugin:private concurrency::OSThread
     TriggerPlugin();
     void AttemptLink();
     void SendTrigger();
+    void SendFullTriggerSequence();
     void SendLinkTerm();
 
     void TriggerServo();

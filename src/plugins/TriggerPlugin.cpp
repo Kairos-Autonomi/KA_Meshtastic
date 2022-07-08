@@ -26,7 +26,18 @@ void TriggerPlugin::AttemptLink()
 
 void TriggerPlugin::SendTrigger(){
     if(devicestate.is_linked){
-        cannedMessagePlugin->sendText(devicestate.linked_id, "trigger", false);
+        cannedMessagePlugin->sendText(devicestate.linked_id, "fire", false);
+    }
+}
+
+void TriggerPlugin::SendFullTriggerSequence(){
+    if(devicestate.is_linked){
+        cannedMessagePlugin->sendText(devicestate.linked_id, "enable", false);
+        delay(500);
+        cannedMessagePlugin->sendText(devicestate.linked_id, "arm", false);
+        delay(500);
+        cannedMessagePlugin->sendText(devicestate.linked_id, "fire", false);
+        delay(500);
     }
 }
 
@@ -109,7 +120,11 @@ int32_t TriggerPlugin::runOnce(){
     Serial.println(pos_json);
 
     if(isArmed && !lastArmedState){
-        
+        timeAtArming = millis();
+    }
+
+    if(isArmed && millis()-timeAtArming > 8000){
+        isArmed = false;
     }
 
     lastArmedState = isArmed;

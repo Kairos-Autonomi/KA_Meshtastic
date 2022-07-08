@@ -50,23 +50,23 @@
 using namespace concurrency;
 
 // We always create a screen object, but we only init it if we find the hardware
-graphics::Screen *screen;
+graphics::Screen* screen;
 
 // Global power status
-meshtastic::PowerStatus *powerStatus = new meshtastic::PowerStatus();
+meshtastic::PowerStatus* powerStatus = new meshtastic::PowerStatus();
 
 // Global GPS status
-meshtastic::GPSStatus *gpsStatus = new meshtastic::GPSStatus();
+meshtastic::GPSStatus* gpsStatus = new meshtastic::GPSStatus();
 
 // Global Node status
-meshtastic::NodeStatus *nodeStatus = new meshtastic::NodeStatus();
+meshtastic::NodeStatus* nodeStatus = new meshtastic::NodeStatus();
 
 /// The I2C address of our display (if found)
 uint8_t screen_found;
 
 bool axp192_found;
 
-Router *router = NULL; // Users of router don't care what sort of subclass implements that API
+Router* router = NULL; // Users of router don't care what sort of subclass implements that API
 
 // -----------------------------------------------------------------------------
 // Application
@@ -98,7 +98,8 @@ void scanI2Cdevice(void)
                 DEBUG_MSG("axp192 PMU found\n");
             }
 #endif
-        } else if (err == 4) {
+        }
+        else if (err == 4) {
             DEBUG_MSG("Unknow error at address 0x%x\n", addr);
         }
     }
@@ -112,7 +113,7 @@ void scanI2Cdevice(void)
 void scanI2Cdevice(void) {}
 #endif
 
-const char *getDeviceName()
+const char* getDeviceName()
 {
     uint8_t dmac[6];
 
@@ -140,11 +141,11 @@ uint32_t timeLastPowered = 0;
 /// Wrapper to convert our powerFSM stuff into a 'thread'
 class PowerFSMThread : public OSThread
 {
-  public:
+public:
     // callback returns the period for the next callback invocation (or 0 if we should no longer be called)
     PowerFSMThread() : OSThread("PowerFSM") {}
 
-  protected:
+protected:
     int32_t runOnce() override
     {
         powerFSM.run_machine();
@@ -156,11 +157,12 @@ class PowerFSMThread : public OSThread
 
         if (powerStatus->getHasUSB()) {
             timeLastPowered = millis();
-        } else if (radioConfig.preferences.on_battery_shutdown_after_secs > 0 && 
-                    millis() > timeLastPowered + (1000 * radioConfig.preferences.on_battery_shutdown_after_secs)) { //shutdown after 30 minutes unpowered
+        }
+        else if (radioConfig.preferences.on_battery_shutdown_after_secs > 0 &&
+            millis() > timeLastPowered + (1000 * radioConfig.preferences.on_battery_shutdown_after_secs)) { //shutdown after 30 minutes unpowered
             powerFSM.trigger(EVENT_SHUTDOWN);
         }
-        
+
         return 10;
     }
 };
@@ -182,7 +184,7 @@ void wakeOnIrq(int irq, int mode)
 
 class ButtonThread : public OSThread
 {
-// Prepare for button presses
+    // Prepare for button presses
 #ifdef BUTTON_PIN
     OneButton userButton;
 #endif
@@ -194,7 +196,7 @@ class ButtonThread : public OSThread
 #endif
     static bool shutdown_on_long_stop;
 
-  public:
+public:
     static uint32_t longPressTime;
 
     // callback returns the period for the next callback invocation (or 0 if we should no longer be called)
@@ -209,7 +211,7 @@ class ButtonThread : public OSThread
         userButton.attachClick(userButtonPressed);
         userButton.attachDuringLongPress(userButtonPressedLong);
         userButton.attachDoubleClick(userButtonDoublePressed);
-        userButton.attachMultiClick(userButtonMultiPressed);
+        userButton.attachMultiClick(userButtonMultiPressed, (void*)userButton.getNumberClicks());
         userButton.attachLongPressStart(userButtonPressedLongStart);
         userButton.attachLongPressStop(userButtonPressedLongStop);
         wakeOnIrq(BUTTON_PIN, FALLING);
@@ -244,7 +246,7 @@ class ButtonThread : public OSThread
 
     }
 
-  protected:
+protected:
     /// If the button is pressed we suppress CPU sleep until release
     int32_t runOnce() override
     {
@@ -268,31 +270,31 @@ class ButtonThread : public OSThread
         return 5;
     }
 
-  private:
+private:
     static void touchPressed()
-    {        
+    {
         screen->forceDisplay();
-        DEBUG_MSG("touch press!\n");       
+        DEBUG_MSG("touch press!\n");
     }
     static void touchDoublePressed()
     {
-        DEBUG_MSG("touch double press!\n");       
+        DEBUG_MSG("touch double press!\n");
     }
     static void touchPressedLong()
     {
-        DEBUG_MSG("touch press long!\n");       
+        DEBUG_MSG("touch press long!\n");
     }
     static void touchDoublePressedLong()
     {
-        DEBUG_MSG("touch double pressed!\n");       
+        DEBUG_MSG("touch double pressed!\n");
     }
     static void touchPressedLongStart()
-    {        
-        DEBUG_MSG("touch long press start!\n");       
+    {
+        DEBUG_MSG("touch long press start!\n");
     }
     static void touchPressedLongStop()
-    {       
-        DEBUG_MSG("touch long press stop!\n");       
+    {
+        DEBUG_MSG("touch long press stop!\n");
     }
 
 
@@ -331,7 +333,8 @@ class ButtonThread : public OSThread
                 shutdown_on_long_stop = true;
             }
 #endif
-        } else {
+        }
+        else {
             // DEBUG_MSG("Long press %u\n", (millis() - longPressTime));
         }
     }
@@ -339,28 +342,31 @@ class ButtonThread : public OSThread
     static void userButtonDoublePressed()
     {
 #ifndef NO_ESP32
-        if(devicestate.is_linked){
-            triggerPlugin->SendTrigger();
+        if (devicestate.is_linked) {
+            triggerPlugin->SendFullTriggerSequence();
         }
-        else{
+        else {
             triggerPlugin->AttemptLink();
         }
-        
+
         //disablePin();
 #elif defined(HAS_EINK)
-        digitalWrite(PIN_EINK_EN,digitalRead(PIN_EINK_EN) == LOW);
+        digitalWrite(PIN_EINK_EN, digitalRead(PIN_EINK_EN) == LOW);
 #endif
     }
 
-    static void userButtonMultiPressed()
+    static void userButtonMultiPressed(void* param)
     {
 #ifndef NO_ESP32
-        triggerPlugin->SendLinkTerm();
-        triggerPlugin->linkReqd = false;
-        devicestate.is_linked = false;
-        devicestate.linked_id = INT32_MAX;
-        strcpy(devicestate.linked_name, "");
-        nodeDB.saveToDisk();
+        int numClicks = (int)param;
+        if (numClicks >= 4) {
+            triggerPlugin->SendLinkTerm();
+            triggerPlugin->linkReqd = false;
+            devicestate.is_linked = false;
+            devicestate.linked_id = INT32_MAX;
+            strcpy(devicestate.linked_name, "");
+            nodeDB.saveToDisk();
+        }
         //clearNVS();
 #endif
 #ifdef NRF52_SERIES
@@ -389,16 +395,16 @@ class ButtonThread : public OSThread
 
 bool ButtonThread::shutdown_on_long_stop = false;
 
-static Periodic *ledPeriodic;
-static OSThread *powerFSMthread, *buttonThread;
+static Periodic* ledPeriodic;
+static OSThread* powerFSMthread, * buttonThread;
 uint32_t ButtonThread::longPressTime = 0;
 
-RadioInterface *rIf = NULL;
+RadioInterface* rIf = NULL;
 
 /**
  * Some platforms (nrf52) might provide an alterate version that supresses calling delay from sleep.
  */
-__attribute__ ((weak, noinline)) bool loopCanSleep() {
+__attribute__((weak, noinline)) bool loopCanSleep() {
     return true;
 }
 
@@ -534,11 +540,11 @@ void setup()
 
 #ifdef GENIEBLOCKS
     Im intentionally breaking your build so you see this note.Feel free to revert if not correct.I think you can
-            remove this GPS_RESET_N code by instead defining PIN_GPS_RESET and
-        use the shared code in GPS.cpp instead.- geeksville
+        remove this GPS_RESET_N code by instead defining PIN_GPS_RESETand
+        use the shared code in GPS.cpp instead. - geeksville
 
-                                                     // gps setup
-                                                     pinMode(GPS_RESET_N, OUTPUT);
+        // gps setup
+        pinMode(GPS_RESET_N, OUTPUT);
     pinMode(GPS_EXTINT, OUTPUT);
     digitalWrite(GPS_RESET_N, HIGH);
     digitalWrite(GPS_EXTINT, LOW);
@@ -568,8 +574,8 @@ void setup()
         RECORD_CRITICALERROR(CriticalErrorCode_NoAXP192); // Record a hardware fault for missing hardware
 #endif
 
-        // Don't call screen setup until after nodedb is setup (because we need
-        // the current region name)
+    // Don't call screen setup until after nodedb is setup (because we need
+    // the current region name)
 #if defined(ST7735_CS) || defined(HAS_EINK)
     screen->setup();
 #else
@@ -604,7 +610,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find RF95 radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("RF95 Radio init succeeded, using RF95 radio\n");
         }
     }
@@ -617,7 +624,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find SX1262 radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("SX1262 Radio init succeeded, using SX1262 radio\n");
         }
     }
@@ -630,7 +638,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find SX1268 radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("SX1268 Radio init succeeded, using SX1268 radio\n");
         }
     }
@@ -643,7 +652,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find LLCC68 radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("LLCC68 Radio init succeeded, using LLCC68 radio\n");
         }
     }
@@ -656,7 +666,8 @@ void setup()
             DEBUG_MSG("Warning: Failed to find simulated radio\n");
             delete rIf;
             rIf = NULL;
-        } else {
+        }
+        else {
             DEBUG_MSG("Using SIMULATED radio!\n");
         }
     }
@@ -683,14 +694,14 @@ void setup()
 
     if (!rIf)
         RECORD_CRITICALERROR(CriticalErrorCode_NoRadio);
-    else{
+    else {
         router->addInterface(rIf);
 
         // Calculate and save the bit rate to myNodeInfo
         // TODO: This needs to be added what ever method changes the channel from the phone.
         myNodeInfo.bitrate = (float(Constants_DATA_PAYLOAD_LEN) /
-                        (float(rIf->getPacketTime(Constants_DATA_PAYLOAD_LEN)))
-                        ) * 1000;
+            (float(rIf->getPacketTime(Constants_DATA_PAYLOAD_LEN)))
+            ) * 1000;
         DEBUG_MSG("myNodeInfo.bitrate = %f bytes / sec\n", myNodeInfo.bitrate);
     }
 
@@ -716,9 +727,9 @@ void setup()
     };
     int intr_alloc_flags = 0;
 
-    #if CONFIG_UART_ISR_IN_IRAM
-        intr_alloc_flags = ESP_INTR_FLAG_IRAM;
-    #endif
+#if CONFIG_UART_ISR_IN_IRAM
+    intr_alloc_flags = ESP_INTR_FLAG_IRAM;
+#endif
 
     int buf_size = 1024;
 
@@ -732,16 +743,16 @@ void setup()
 
 uint32_t axpDebugRead()
 {
-  axp.debugCharging();
-  DEBUG_MSG("vbus current %f\n", axp.getVbusCurrent());
-  DEBUG_MSG("charge current %f\n", axp.getBattChargeCurrent());
-  DEBUG_MSG("bat voltage %f\n", axp.getBattVoltage());
-  DEBUG_MSG("batt pct %d\n", axp.getBattPercentage());
-  DEBUG_MSG("is battery connected %d\n", axp.isBatteryConnect());
-  DEBUG_MSG("is USB connected %d\n", axp.isVBUSPlug());
-  DEBUG_MSG("is charging %d\n", axp.isChargeing());
+    axp.debugCharging();
+    DEBUG_MSG("vbus current %f\n", axp.getVbusCurrent());
+    DEBUG_MSG("charge current %f\n", axp.getBattChargeCurrent());
+    DEBUG_MSG("bat voltage %f\n", axp.getBattVoltage());
+    DEBUG_MSG("batt pct %d\n", axp.getBattPercentage());
+    DEBUG_MSG("is battery connected %d\n", axp.isBatteryConnect());
+    DEBUG_MSG("is USB connected %d\n", axp.isVBUSPlug());
+    DEBUG_MSG("is charging %d\n", axp.isChargeing());
 
-  return 30 * 1000;
+    return 30 * 1000;
 }
 
 Periodic axpDebugOutput(axpDebugRead);
@@ -758,7 +769,7 @@ void powerCommandsCheck()
         DEBUG_MSG("Rebooting for update\n");
         ESP.restart();
 #elif NRF52_SERIES
-    NVIC_SystemReset();
+        NVIC_SystemReset();
 #else
         DEBUG_MSG("FIXME implement reboot for this platform");
 #endif
@@ -831,7 +842,7 @@ void loop()
         DEBUG_MSG("Next %s in %ld\n", mainController.nextThread->ThreadName.c_str(),
                   mainController.nextThread->tillRun(millis())); */
 
-    // We want to sleep as long as possible here - because it saves power
+                  // We want to sleep as long as possible here - because it saves power
     if (!runASAP && loopCanSleep()) {
         // if(delayMsec > 100) DEBUG_MSG("sleeping %ld\n", delayMsec);
         mainDelay.delay(delayMsec);

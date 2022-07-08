@@ -74,7 +74,7 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     else if (strcmp(cmd, "disarm") == 0) {
         triggerPlugin->isArmed = false;
     }
-    else if (strcmp(cmd, "trigger") == 0) {
+    else if (strcmp(cmd, "fire") == 0) {
         Serial.println("got trigger");
         if(devicestate.is_linked && mp.from == devicestate.linked_id){
             triggerPlugin->TriggerServo();
@@ -84,7 +84,7 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
             Serial.println("ignored trigger");
         }
     }
-    else if(strcmp(cmd, "triggeroverride") == 0){
+    else if(strcmp(cmd, "fireoverride") == 0){
         Serial.println("is override");
         triggerPlugin->TriggerServo();
 
