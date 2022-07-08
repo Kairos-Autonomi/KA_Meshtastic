@@ -62,6 +62,18 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     else if (strcmp(cmd, "reqComp") == 0) {
         triggerPlugin->linkReqd = false;
     }
+    else if (strcmp(cmd, "disable") == 0) {
+        triggerPlugin->isEnabled = false;
+    }
+    else if (strcmp(cmd, "enable") == 0) {
+        triggerPlugin->isEnabled = true;
+    }
+    else if (strcmp(cmd, "arm") == 0) {
+        triggerPlugin->isArmed = true;
+    }
+    else if (strcmp(cmd, "disarm") == 0) {
+        triggerPlugin->isArmed = false;
+    }
     else if (strcmp(cmd, "trigger") == 0) {
         Serial.println("got trigger");
         if(devicestate.is_linked && mp.from == devicestate.linked_id){
