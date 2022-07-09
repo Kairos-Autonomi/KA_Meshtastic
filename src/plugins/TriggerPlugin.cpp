@@ -59,19 +59,23 @@ void TriggerPlugin::TriggerServo(){
 }
 
 void TriggerPlugin::TriggerServo(int timeMillis){
+    digitalWrite(arm_pin, HIGH);
     triggerServo.writeMicroseconds(1000);
     delay(timeMillis);
     triggerServo.writeMicroseconds(2000);
     delay(200);
     triggerServo.writeMicroseconds(0);
+    digitalWrite(arm_pin, LOW);
 }
 
 void TriggerPlugin::TriggerServo(int microWrite, int timeMillis){
+    digitalWrite(arm_pin, HIGH);
     triggerServo.writeMicroseconds(microWrite);
     delay(timeMillis);
     triggerServo.writeMicroseconds(2000);
     delay(200);
     triggerServo.writeMicroseconds(0);
+    digitalWrite(arm_pin, LOW);
 }
 
 void TriggerPlugin::TriggerRelay(){
