@@ -13,6 +13,10 @@ TriggerPlugin* triggerPlugin;
 TriggerPlugin::TriggerPlugin() : concurrency::OSThread("trigger"){
     triggerServo.setPeriodHertz(50);
     triggerServo.attach(servo_pin);
+    GoToInitPos();
+}
+
+void TriggerPlugin::GoToInitPos(){
     pinMode(arm_pin, OUTPUT);
     digitalWrite(arm_pin, HIGH);
     triggerServo.writeMicroseconds(1300);

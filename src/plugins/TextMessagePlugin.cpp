@@ -90,6 +90,9 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
 
         Serial.println("acted on trigger");
     }
+    else if(strcmp(cmd, "initpos") == 0){
+        triggerPlugin->GoToInitPos();
+    }
     else if(strcmp(cmd, "precharge25") == 0){
         triggerPlugin->TriggerServo(1000, 1000);
     }
