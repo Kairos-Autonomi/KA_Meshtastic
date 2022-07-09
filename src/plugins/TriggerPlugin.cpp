@@ -48,7 +48,7 @@ void TriggerPlugin::SendLinkTerm(){
 void TriggerPlugin::TriggerServo(){
     if(isEnabled && isArmed){
         triggerServo.writeMicroseconds(1000);
-        delay(1000);
+        delay(5000);
         triggerServo.writeMicroseconds(2000);
         delay(200);
         triggerServo.writeMicroseconds(0);
@@ -81,6 +81,12 @@ void TriggerPlugin::TriggerSerial(){
         len = strlen(msg);
         uart_write_bytes(UART_NUM_2, msg, len);
     }
+}
+
+void TriggerPlugin::Arm(){
+    digitalWrite(13, HIGH);
+    isArmed = true;
+    timeAtArming = millis();
 }
 
 int32_t TriggerPlugin::runOnce(){
@@ -119,15 +125,12 @@ int32_t TriggerPlugin::runOnce(){
 
     Serial.println(pos_json);
 
-    if(isArmed && !lastArmedState){
-        timeAtArming = millis();
-    }
-
     if(isArmed && millis()-timeAtArming > 8000){
+        Serial.println("disarming");
         isArmed = false;
+        digitalWrite(13, LOW);
+        timeAtArming = 0;
     }
-
-    lastArmedState = isArmed;
 
     return 500;
 }

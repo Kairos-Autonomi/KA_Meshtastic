@@ -69,7 +69,7 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
         triggerPlugin->isEnabled = true;
     }
     else if (strcmp(cmd, "arm") == 0) {
-        triggerPlugin->isArmed = true;
+        triggerPlugin->Arm();
     }
     else if (strcmp(cmd, "disarm") == 0) {
         triggerPlugin->isArmed = false;
