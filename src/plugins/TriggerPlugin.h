@@ -27,6 +27,8 @@ class TriggerPlugin:private concurrency::OSThread
     void Arm();
 
     void TriggerServo();
+    void TriggerServo(int timeMillis);
+    void TriggerServo(int microWrite, int timeMillis);
     void TriggerRelay();
     void TriggerSerial();
 
