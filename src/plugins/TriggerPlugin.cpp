@@ -11,8 +11,6 @@ TriggerPlugin::TriggerPlugin() : concurrency::OSThread("trigger"){
     triggerServo.setPeriodHertz(50);
     triggerServo.attach(15);
     triggerServo.writeMicroseconds(2000);
-    delay(200);
-    triggerServo.writeMicroseconds(0);
 }
 
 void TriggerPlugin::AttemptLink()
@@ -48,10 +46,8 @@ void TriggerPlugin::SendLinkTerm(){
 void TriggerPlugin::TriggerServo(){
     if(isEnabled && isArmed){
         triggerServo.writeMicroseconds(1000);
-        delay(5000);
+        delay(10000);
         triggerServo.writeMicroseconds(2000);
-        delay(200);
-        triggerServo.writeMicroseconds(0);
     }
 }
 
