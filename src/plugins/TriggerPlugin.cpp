@@ -11,8 +11,6 @@ TriggerPlugin::TriggerPlugin() : concurrency::OSThread("trigger"){
     triggerServo.setPeriodHertz(50);
     triggerServo.attach(15);
     triggerServo.writeMicroseconds(2000);
-    delay(200);
-    triggerServo.writeMicroseconds(0);
 }
 
 void TriggerPlugin::AttemptLink()
@@ -26,7 +24,18 @@ void TriggerPlugin::AttemptLink()
 
 void TriggerPlugin::SendTrigger(){
     if(devicestate.is_linked){
-        cannedMessagePlugin->sendText(devicestate.linked_id, "trigger", false);
+        cannedMessagePlugin->sendText(devicestate.linked_id, "fire", false);
+    }
+}
+
+void TriggerPlugin::SendFullTriggerSequence(){
+    if(devicestate.is_linked){
+        cannedMessagePlugin->sendText(devicestate.linked_id, "enable", false);
+        delay(500);
+        cannedMessagePlugin->sendText(devicestate.linked_id, "arm", false);
+        delay(500);
+        cannedMessagePlugin->sendText(devicestate.linked_id, "fire", false);
+        delay(500);
     }
 }
 
@@ -35,35 +44,45 @@ void TriggerPlugin::SendLinkTerm(){
 }
 
 void TriggerPlugin::TriggerServo(){
-    triggerServo.writeMicroseconds(1000);
-    delay(1000);
-    triggerServo.writeMicroseconds(2000);
-    delay(200);
-    triggerServo.writeMicroseconds(0);
+    if(isEnabled && isArmed){
+        triggerServo.writeMicroseconds(1000);
+        delay(10000);
+        triggerServo.writeMicroseconds(2000);
+    }
 }
 
 void TriggerPlugin::TriggerRelay(){
-    digitalWrite(13, HIGH);
-    delay(1000);
-    digitalWrite(13, LOW);
+    if(isEnabled && isArmed){
+        digitalWrite(13, HIGH);
+        delay(1000);
+        digitalWrite(13, LOW);
+    }
 }
 
 void TriggerPlugin::TriggerSerial(){
-    char msg[50] = "trigger enable\n\r";
-            int len = strlen(msg);
-            uart_write_bytes(UART_NUM_2, msg, len);
+    if(isEnabled && isArmed){
+        char msg[50] = "trigger enable\n\r";
+        int len = strlen(msg);
+        uart_write_bytes(UART_NUM_2, msg, len);
 
-            delay(200);
+        delay(200);
 
-            strcpy(msg, "trigger arm\n\r");
-            len = strlen(msg);
-            uart_write_bytes(UART_NUM_2, msg, len);
+        strcpy(msg, "trigger arm\n\r");
+        len = strlen(msg);
+        uart_write_bytes(UART_NUM_2, msg, len);
 
-            delay(200);
+        delay(200);
 
-            strcpy(msg, "trigger fire\n\r");
-            len = strlen(msg);
-            uart_write_bytes(UART_NUM_2, msg, len);
+        strcpy(msg, "trigger fire\n\r");
+        len = strlen(msg);
+        uart_write_bytes(UART_NUM_2, msg, len);
+    }
+}
+
+void TriggerPlugin::Arm(){
+    digitalWrite(13, HIGH);
+    isArmed = true;
+    timeAtArming = millis();
 }
 
 int32_t TriggerPlugin::runOnce(){
@@ -101,6 +120,14 @@ int32_t TriggerPlugin::runOnce(){
     strcat(pos_json, "]");
 
     Serial.println(pos_json);
+
+    if(isArmed && millis()-timeAtArming > 8000){
+        Serial.println("disarming");
+        isArmed = false;
+        digitalWrite(13, LOW);
+        timeAtArming = 0;
+    }
+
     return 500;
 }
 
