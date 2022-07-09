@@ -7,10 +7,17 @@
 
 TriggerPlugin* triggerPlugin;
 
+#define servo_pin 2
+#define arm_pin 13
+
 TriggerPlugin::TriggerPlugin() : concurrency::OSThread("trigger"){
     triggerServo.setPeriodHertz(50);
-    triggerServo.attach(15);
-    triggerServo.writeMicroseconds(2000);
+    triggerServo.attach(servo_pin);
+    pinMode(arm_pin, OUTPUT);
+    digitalWrite(arm_pin, HIGH);
+    triggerServo.writeMicroseconds(1300);
+    delay(1000);
+    digitalWrite(arm_pin, LOW);
 }
 
 void TriggerPlugin::AttemptLink()
@@ -60,18 +67,18 @@ void TriggerPlugin::TriggerServo(int timeMillis){
 }
 
 void TriggerPlugin::TriggerServo(int microWrite, int timeMillis){
-    triggerServo.writeMicroseconds(1000);
-    delay(timeMillis);
     triggerServo.writeMicroseconds(microWrite);
+    delay(timeMillis);
+    triggerServo.writeMicroseconds(2000);
     delay(200);
     triggerServo.writeMicroseconds(0);
 }
 
 void TriggerPlugin::TriggerRelay(){
     if(isEnabled && isArmed){
-        digitalWrite(13, HIGH);
+        digitalWrite(arm_pin, HIGH);
         delay(1000);
-        digitalWrite(13, LOW);
+        digitalWrite(arm_pin, LOW);
     }
 }
 
@@ -96,7 +103,7 @@ void TriggerPlugin::TriggerSerial(){
 }
 
 void TriggerPlugin::Arm(){
-    digitalWrite(13, HIGH);
+    digitalWrite(arm_pin, HIGH);
     isArmed = true;
     timeAtArming = millis();
 }
@@ -137,10 +144,10 @@ int32_t TriggerPlugin::runOnce(){
 
     Serial.println(pos_json);
 
-    if(isArmed && millis()-timeAtArming > 8000){
+    if(isArmed && millis()-timeAtArming > 16000){
         Serial.println("disarming");
         isArmed = false;
-        digitalWrite(13, LOW);
+        digitalWrite(arm_pin, LOW);
         timeAtArming = 0;
     }
 

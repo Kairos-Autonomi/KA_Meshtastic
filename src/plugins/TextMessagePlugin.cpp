@@ -91,13 +91,13 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
         Serial.println("acted on trigger");
     }
     else if(strcmp(cmd, "precharge25") == 0){
-        triggerPlugin->TriggerServo(1500, 1000);
+        triggerPlugin->TriggerServo(1000, 1000);
     }
     else if(strcmp(cmd, "precharge50") == 0){
-        triggerPlugin->TriggerServo(1500, 3000);
+        triggerPlugin->TriggerServo(1000, 3000);
     }
     else if(strcmp(cmd, "precharge75") == 0){
-        triggerPlugin->TriggerServo(1500, 5000);
+        triggerPlugin->TriggerServo(1000, 5000);
     }
     else if (strcmp(cmd, "linkTerm") == 0) {
         if (mp.from == devicestate.linked_id) {

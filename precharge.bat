@@ -1,0 +1,1 @@
+meshtastic --port %1 --dest %2 --sendtext precharge%3
