@@ -143,7 +143,9 @@ int32_t TriggerPlugin::runOnce(){
         strcat(pos_json, node.user.id);
         strcat(pos_json, "\",\"name\":\"");
         strcat(pos_json, node.user.long_name);
-        strcat(pos_json, "\",\"lat\":");
+        strcat(pos_json, "\",\"num\":");
+        strcat(pos_json, itoa(node.num, intbuf, 10));
+        strcat(pos_json, ",\"lat\":");
         strcat(pos_json, itoa(node.position.latitude_i, intbuf, 10));
         strcat(pos_json, ",\"lon\":");
         strcat(pos_json, itoa(node.position.longitude_i, intbuf, 10));
