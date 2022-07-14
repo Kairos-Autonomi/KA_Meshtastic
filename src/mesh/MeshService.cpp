@@ -119,21 +119,26 @@ void MeshService::reloadOwner()
  */
 void MeshService::handleToRadio(MeshPacket &p)
 {
+    Serial.println("MESH SERVICE HANDLING!!!!");
     if (p.from != 0) { // We don't let phones assign nodenums to their sent messages
         DEBUG_MSG("Warning: phone tried to pick a nodenum, we don't allow that.\n");
+        Serial.println("WARNING!!!!");
         p.from = 0;
     } else {
         // p.from = nodeDB.getNodeNum();
     }
 
     if (p.id == 0)
+        Serial.println("PACKET ID GEN!!!!");
         p.id = generatePacketId(); // If the phone didn't supply one, then pick one
 
+    Serial.println("GETTING TIME!!!!");
     p.rx_time = getValidTime(RTCQualityFromNet); // Record the time the packet arrived from the phone
                                                  // (so we update our nodedb for the local node)
+    Serial.println("GOT TIME!!!!");
 
     // Send the packet into the mesh
-
+    Serial.println("COPYING AND SENDING!!!!");
     sendToMesh(packetPool.allocCopy(p), RX_SRC_USER);
 
     bool loopback = false; // if true send any packet the phone sends back itself (for testing)
@@ -153,6 +158,7 @@ bool MeshService::cancelSending(PacketId id)
 
 void MeshService::sendToMesh(MeshPacket *p, RxSource src, bool ccToPhone)
 {
+    Serial.println("SENDING TO MESH!!!");
     nodeDB.updateFrom(*p); // update our local DB for this packet (because phone might have sent position packets etc...)
 
     // Note: We might return !OK if our fifo was full, at that point the only option we have is to drop it

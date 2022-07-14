@@ -46,6 +46,8 @@ int32_t StreamAPI::readStream()
             } else if (ptr == 1) { // looking for START2
                 if (c != START2)
                     rxPtr = 0;                             // failed to find framing
+                else
+                    Serial.println("GOT HEADER!!!");
             } else if (ptr >= HEADER_LEN - 1) {            // we have at least read our 4 byte framing
                 uint32_t len = (rxBuf[2] << 8) + rxBuf[3]; // big endian 16 bit length follows framing
 

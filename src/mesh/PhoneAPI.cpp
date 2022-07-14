@@ -80,9 +80,11 @@ bool PhoneAPI::handleToRadio(const uint8_t *buf, size_t bufLength)
     if (pb_decode_from_bytes(buf, bufLength, ToRadio_fields, &toRadioScratch)) {
         switch (toRadioScratch.which_payloadVariant) {
         case ToRadio_packet_tag:
+            Serial.println("PACKET CASE!!!!");
             return handleToRadioPacket(toRadioScratch.packet);
 
         case ToRadio_want_config_id_tag:
+            Serial.println("WANT CONFIG CASE!!!!");
             config_nonce = toRadioScratch.want_config_id;
             DEBUG_MSG("Client wants config, nonce=%u\n", config_nonce);
 
@@ -90,10 +92,12 @@ bool PhoneAPI::handleToRadio(const uint8_t *buf, size_t bufLength)
             break;
 
         case ToRadio_disconnect_tag:
+            Serial.println("DISCONNECT CASE!!!!");
             close();
             break;
 
         default:
+            Serial.println("DEFAULT CASE!!!!");
             // Ignore nop messages
             // DEBUG_MSG("Error: unexpected ToRadio variant\n");
             break;

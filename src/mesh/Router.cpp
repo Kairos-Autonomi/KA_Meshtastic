@@ -158,6 +158,7 @@ ErrorCode Router::sendLocal(MeshPacket *p, RxSource src)
         return ERRNO_OK;
     } else if (!iface) {
         // We must be sending to remote nodes also, fail if no interface found
+        Serial.println("NO IFACE!!!!");
         abortSendAndNak(Routing_Error_NO_INTERFACE, p);
 
         return ERRNO_NO_INTERFACES;
@@ -252,6 +253,7 @@ ErrorCode Router::send(MeshPacket *p)
     }
 
     assert(iface); // This should have been detected already in sendLocal (or we just received a packet from outside)
+    Serial.println("SENDING MESSAGE!!!!");
     return iface->send(p);
 }
 
