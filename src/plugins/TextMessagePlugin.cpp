@@ -59,6 +59,12 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
 
         // screen->goToStatusScreen();
     }
+    else if (strcmp(cmd, "clear") == 0) {
+        nodeDB.forgetNodeDB();
+    }
+    else if (strcmp(cmd, "ping") == 0) {
+        cannedMessagePlugin->sendText(mp.from, "pong", false);
+    }
     else if (strcmp(cmd, "reqComp") == 0) {
         triggerPlugin->linkReqd = false;
     }
@@ -97,10 +103,10 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
         triggerPlugin->TriggerServo(1000, 1000);
     }
     else if(strcmp(cmd, "precharge50") == 0){
-        triggerPlugin->TriggerServo(1000, 3000);
+        triggerPlugin->TriggerServo(1000, 2000);
     }
     else if(strcmp(cmd, "precharge75") == 0){
-        triggerPlugin->TriggerServo(1000, 5000);
+        triggerPlugin->TriggerServo(1000, 3000);
     }
     else if (strcmp(cmd, "linkTerm") == 0) {
         if (mp.from == devicestate.linked_id) {

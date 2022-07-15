@@ -13,13 +13,22 @@ TriggerPlugin* triggerPlugin;
 TriggerPlugin::TriggerPlugin() : concurrency::OSThread("trigger"){
     triggerServo.setPeriodHertz(50);
     triggerServo.attach(servo_pin);
-    GoToInitPos();
+    //GoToInitPos();
+    GoToOffPos();
 }
 
 void TriggerPlugin::GoToInitPos(){
     pinMode(arm_pin, OUTPUT);
     digitalWrite(arm_pin, HIGH);
     triggerServo.writeMicroseconds(1300);
+    delay(1000);
+    digitalWrite(arm_pin, LOW);
+}
+
+void TriggerPlugin::GoToOffPos(){
+    pinMode(arm_pin, OUTPUT);
+    digitalWrite(arm_pin, HIGH);
+    triggerServo.writeMicroseconds(2000);
     delay(1000);
     digitalWrite(arm_pin, LOW);
 }
@@ -56,6 +65,7 @@ void TriggerPlugin::SendLinkTerm(){
 
 void TriggerPlugin::TriggerServo(){
     if(isEnabled && isArmed){
+        timeAtArming = millis();
         digitalWrite(arm_pin, HIGH);
         triggerServo.writeMicroseconds(1000);
         delay(10000);
@@ -134,27 +144,31 @@ int32_t TriggerPlugin::runOnce(){
     // }
     // return 100;
 
-    char pos_json[1000];
+    char radio_json[3000];
     char intbuf[16];
-    strcpy(pos_json, "[");
+    strcpy(radio_json, "[");
     for(int i = 0; i < nodeDB.getNumNodes(); i++){
         NodeInfo node = *nodeDB.getNodeByIndex(i);
-        strcat(pos_json, "{\"id\":\"");
-        strcat(pos_json, node.user.id);
-        strcat(pos_json, "\",\"name\":\"");
-        strcat(pos_json, node.user.long_name);
-        strcat(pos_json, "\",\"num\":");
-        strcat(pos_json, itoa(node.num, intbuf, 10));
-        strcat(pos_json, ",\"lat\":");
-        strcat(pos_json, itoa(node.position.latitude_i, intbuf, 10));
-        strcat(pos_json, ",\"lon\":");
-        strcat(pos_json, itoa(node.position.longitude_i, intbuf, 10));
-        strcat(pos_json, "},");
+        strcat(radio_json, "{\"id\":\"");
+        strcat(radio_json, node.user.id);
+        strcat(radio_json, "\",\"name\":\"");
+        strcat(radio_json, node.user.long_name);
+        strcat(radio_json, "\",\"num\":");
+        strcat(radio_json, utoa(node.num, intbuf, 10));
+        strcat(radio_json, ",\"lat\":");
+        strcat(radio_json, itoa(node.position.latitude_i, intbuf, 10));
+        strcat(radio_json, ",\"lon\":");
+        strcat(radio_json, itoa(node.position.longitude_i, intbuf, 10));
+        strcat(radio_json, ",\"bat\":");
+        strcat(radio_json, itoa(node.position.battery_level, intbuf, 10));
+        strcat(radio_json, ",\"last_heard\":");
+        strcat(radio_json, utoa(node.last_heard, intbuf, 10));
+        strcat(radio_json, "},");
     }
-    pos_json[strlen(pos_json)-1] = 0;
-    strcat(pos_json, "]");
+    radio_json[strlen(radio_json)-1] = 0;
+    strcat(radio_json, "]");
 
-    Serial.println(pos_json);
+    Serial.println(radio_json);
 
     if(isArmed && millis()-timeAtArming > 16000){
         Serial.println("disarming");
