@@ -565,6 +565,8 @@ void NodeDB::updateFrom(const MeshPacket &mp)
         DEBUG_MSG("Update DB node 0x%x, rx_time=%u\n", mp.from, mp.rx_time);
 
         NodeInfo *info = getOrCreateNode(getFrom(&mp));
+        char intbuf[16];
+        Serial.print(itoa(info->position.battery_level, intbuf, 10));
         if (!info) {
             return;
         }

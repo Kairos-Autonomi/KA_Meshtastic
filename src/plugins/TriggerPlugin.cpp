@@ -172,6 +172,10 @@ int32_t TriggerPlugin::runOnce(){
 
     if(isArmed && millis()-timeAtArming > 16000){
         Serial.println("disarming");
+        triggerServo.writeMicroseconds(2000);
+        cannedMessagePlugin->sendText(NODENUM_BROADCAST, "wrote micro", false);
+        delay(3000);
+
         isArmed = false;
         digitalWrite(arm_pin, LOW);
         timeAtArming = 0;

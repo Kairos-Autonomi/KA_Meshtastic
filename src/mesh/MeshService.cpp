@@ -69,6 +69,7 @@ int MeshService::handleFromRadio(const MeshPacket *mp)
     powerFSM.trigger(EVENT_PACKET_FOR_PHONE); // Possibly keep the node from sleeping
 
     printPacket("Forwarding to phone", mp);
+    Serial.println("UPDATING DB!!!");
     nodeDB.updateFrom(*mp); // update our DB state based off sniffing every RX packet from the radio
 
     sendToPhone((MeshPacket *)mp);

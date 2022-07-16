@@ -20,15 +20,6 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     char* cmd = strtok((char*)p.payload.bytes, " ");
     char* sarg1 = strtok(NULL, " ");
 
-    char msg[500] = "{\"msg\":\"";
-    char intbuf[16];
-    strcat(msg, (char*)mp.decoded.payload.bytes);
-    strcat(msg, "\", \"from\":");
-    strcat(msg, utoa(mp.from, intbuf, 10));
-    strcat(msg, "}");
-    int len = strlen(msg);
-    Serial.println(msg);
-
     if (strcmp(cmd, "linkReq") == 0) {
         if (devicestate.is_linked && mp.from == devicestate.linked_id) {
             devicestate.is_linked = false;
