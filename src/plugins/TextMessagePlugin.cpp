@@ -20,6 +20,15 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     char* cmd = strtok((char*)p.payload.bytes, " ");
     char* sarg1 = strtok(NULL, " ");
 
+    char msg[500] = "{\"msg\":\"";
+    char intbuf[16];
+    strcat(msg, (char*)mp.decoded.payload.bytes);
+    strcat(msg, "\", \"from\":");
+    strcat(msg, utoa(mp.from, intbuf, 10));
+    strcat(msg, "}");
+    int len = strlen(msg);
+    Serial.println(msg);
+
     if (strcmp(cmd, "linkReq") == 0) {
         if (devicestate.is_linked && mp.from == devicestate.linked_id) {
             devicestate.is_linked = false;
@@ -61,6 +70,7 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     }
     else if (strcmp(cmd, "clear") == 0) {
         nodeDB.forgetNodeDB();
+        cannedMessagePlugin->sendText(mp.from, "clearconf", false);
     }
     else if (strcmp(cmd, "ping") == 0) {
         cannedMessagePlugin->sendText(mp.from, "pong", false);
@@ -70,42 +80,53 @@ ProcessMessage TextMessagePlugin::handleReceived(const MeshPacket& mp)
     }
     else if (strcmp(cmd, "disable") == 0) {
         triggerPlugin->isEnabled = false;
+        cannedMessagePlugin->sendText(mp.from, "disableconf", false);
     }
     else if (strcmp(cmd, "enable") == 0) {
         triggerPlugin->isEnabled = true;
+        cannedMessagePlugin->sendText(mp.from, "enableconf", false);
     }
     else if (strcmp(cmd, "arm") == 0) {
         triggerPlugin->Arm();
+        cannedMessagePlugin->sendText(mp.from, "armconf", false);
     }
     else if (strcmp(cmd, "disarm") == 0) {
         triggerPlugin->isArmed = false;
+        cannedMessagePlugin->sendText(mp.from, "disarmconf", false);
     }
     else if (strcmp(cmd, "fire") == 0) {
         Serial.println("got trigger");
         if(devicestate.is_linked && mp.from == devicestate.linked_id){
+            cannedMessagePlugin->sendText(mp.from, "fireconf", false);
             triggerPlugin->TriggerServo();
         }
         else {
+            cannedMessagePlugin->sendText(mp.from, "fireignore", false);
             ignore = true;
             Serial.println("ignored trigger");
         }
     }
     else if(strcmp(cmd, "fireoverride") == 0){
         Serial.println("is override");
+        cannedMessagePlugin->sendText(mp.from, "fireoverrideconf", false);
         triggerPlugin->TriggerServo();
 
         Serial.println("acted on trigger");
     }
     else if(strcmp(cmd, "initpos") == 0){
+        cannedMessagePlugin->sendText(mp.from, "initposconf", false);
         triggerPlugin->GoToInitPos();
     }
     else if(strcmp(cmd, "precharge25") == 0){
+        cannedMessagePlugin->sendText(mp.from, "precharge25conf", false);
         triggerPlugin->TriggerServo(1000, 1000);
     }
     else if(strcmp(cmd, "precharge50") == 0){
+        cannedMessagePlugin->sendText(mp.from, "precharge50conf", false);
         triggerPlugin->TriggerServo(1000, 2000);
     }
     else if(strcmp(cmd, "precharge75") == 0){
+        cannedMessagePlugin->sendText(mp.from, "precharge75conf", false);
         triggerPlugin->TriggerServo(1000, 3000);
     }
     else if (strcmp(cmd, "linkTerm") == 0) {
