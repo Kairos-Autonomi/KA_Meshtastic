@@ -46,6 +46,9 @@
 #include "SX1268Interface.h"
 #include "LLCC68Interface.h"
 
+#define servo_pin 2
+#define arm_pin 13
+
 
 using namespace concurrency;
 
@@ -713,8 +716,8 @@ void setup()
     setCPUFast(false); // 80MHz is fine for our slow peripherals
 
     //relay control setup
-    pinMode(13, OUTPUT);
-    digitalWrite(13, LOW);
+    pinMode(arm_pin, OUTPUT);
+    pinMode(servo_pin, OUTPUT);
 
     //UART2 Set Up
 

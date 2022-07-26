@@ -1,7 +1,7 @@
-#include "configuration.h"
 #include "SerialConsole.h"
 #include "NodeDB.h"
 #include "PowerFSM.h"
+#include "configuration.h"
 
 #define Port Serial
 
@@ -49,6 +49,12 @@ bool SerialConsole::handleToRadio(const uint8_t *buf, size_t len)
         setDestination(&noopPrint);
     canWrite = true;
 
+    Serial.println("SERIAL CONSOLE HANDLETORADIO!!!!!!!!!!!!");
+    for (int i = 0; i < len; i++) {
+        Serial.print((int)buf[i]);
+        Serial.print(" ");
+    }
+    Serial.println();
+
     return StreamAPI::handleToRadio(buf, len);
 }
-

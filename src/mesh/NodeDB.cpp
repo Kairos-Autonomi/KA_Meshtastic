@@ -166,6 +166,10 @@ void NodeDB::installDefaultChannels()
     memset(&channelFile, 0, sizeof(channelFile));
 }
 
+void NodeDB::forgetNodeDB(){
+    *numNodes = 0; // Forget node DB
+}
+
 void NodeDB::installDefaultDeviceState()
 {
     // We try to preserve the region setting because it will really bum users out if we discard it
